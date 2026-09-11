@@ -2152,8 +2152,14 @@ function settlePot(communityComplete){
   for(const level of levels){
     const contributors = participants.filter(p => p.totalContributed >= level);
     const amount = (level - prev) * contributors.length;
-    const eligible = contributors.filter(p => !p.folded);
-    layers.push({amount, eligible});
+    if(contributors.length === 1){
+      // Nobody else covered this much — it was never actually contested, so it's
+      // not a side pot at all, just an uncalled excess. Return it directly.
+      contributors[0].chips += amount;
+    } else {
+      const eligible = contributors.filter(p => !p.folded);
+      layers.push({amount, eligible});
+    }
     prev = level;
   }
 
@@ -2798,6 +2804,16 @@ function analyzeRecordedHand(h, R){
   const potTotal = res.pots.reduce((s, x) => s + x.amount, 0);
   const winners = new Set(res.pots.flatMap(x => x.winners));
 
+  // A player who only scraped a small side pot while the bulk of the money went
+  // elsewhere didn't really win the hand — don't let that validate a call.
+  const winAmounts = {};
+  res.pots.forEach(pot => {
+    if(!pot.winners.length) return;
+    const share = pot.amount / pot.winners.length;
+    pot.winners.forEach(w => { winAmounts[w] = (winAmounts[w] || 0) + share; });
+  });
+  const wonMeaningfully = name => (winAmounts[name] || 0) >= potTotal * 0.5;
+
   R.stats.totalPot += potTotal;
   if(potTotal > R.stats.biggestPot) R.stats.biggestPot = potTotal;
   if(res.showdown) R.stats.showdowns++; else R.stats.foldWins++;
@@ -2823,7 +2839,7 @@ function analyzeRecordedHand(h, R){
 
     // A call made as a clear underdog that still got there.
     if(a.action === 'call' && a.equity != null && a.equity < 0.22
-       && callBB >= 3 && winners.has(a.name)){
+       && callBB >= 3 && wonMeaningfully(a.name)){
       pushNotable(R, 'amazingCalls', h, (0.30 - a.equity) * 100 + potTotal / BIG_BLIND,
         `${a.name} called ${Math.round(callBB)}BB on the ${a.street} as a ${eqPhrase(a.equity)} underdog — and got there`);
       tags.push('amazingCall');
@@ -2831,7 +2847,7 @@ function analyzeRecordedHand(h, R){
 
     // Calling a big bet with almost nothing, and being right.
     if(a.action === 'call' && callBB >= 4 && (a.street === 'turn' || a.street === 'river')
-       && winners.has(a.name) && complete && finals[a.name] && finals[a.name].cat <= 1
+       && wonMeaningfully(a.name) && complete && finals[a.name] && finals[a.name].cat <= 1
        && a.equity != null && a.equity < 0.55){
       pushNotable(R, 'heroCalls', h, callBB + potTotal / BIG_BLIND,
         `${a.name} called ${Math.round(callBB)}BB on the ${a.street} with only ${describeHand(finals[a.name])} — and was right`);
