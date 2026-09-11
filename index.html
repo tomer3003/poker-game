@@ -17,6 +17,8 @@
     --card-face:#f6f1e4;
     --ink:#1b1b1b;
     --red-suit:#a6291f;
+    --club-suit:#1f6f4a;
+    --diamond-suit:#1d4e8c;
     --cream:#efe7d6;
     --muted:#9fb6ac;
     --panel:#0a2119ee;
@@ -29,7 +31,7 @@
     color:var(--cream);
     overflow:hidden;
   }
-  #app{ position:relative; width:100vw; height:100vh; display:flex; flex-direction:column; }
+  #app{ position:relative; width:100vw; height:100vh; height:100dvh; display:flex; flex-direction:column; }
   header{
     flex:0 0 auto;
     display:flex;align-items:center;justify-content:space-between;
@@ -112,21 +114,23 @@
   .blind-btn.sb{ background:#d7dde0; color:#1b1b1b; }
   .blind-btn.bb{ background:var(--rail-trim); color:#241407; }
   .blind-btn.ob{ background:#7c4dbd; color:#fff; top:auto; bottom:-6px; left:6px; }
-  .hole-cards{ display:flex; gap:3px; justify-content:center; margin-top:4px; height:44px; }
+  .hole-cards{ display:flex; gap:3px; justify-content:center; margin-top:4px; height:clamp(44px, 4.2vw, 80px); }
   .hole-cards.compact .card{ width:22px; height:32px; font-size:10px; }
   .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:10px; }
   .card{
-    width:clamp(30px, 2.1vw, 40px);height:clamp(42px, 2.95vw, 56px);border-radius:4px; background:var(--card-face);
+    width:clamp(30px, 3vw, 56px);height:clamp(42px, 4.2vw, 78px);border-radius:4px; background:var(--card-face);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    font-weight:700;font-size:clamp(13px, 0.95vw, 17px);line-height:1;
+    font-weight:700;font-size:clamp(13px, 1.3vw, 22px);line-height:1;
     box-shadow:0 2px 5px rgba(0,0,0,.4); border:1px solid rgba(0,0,0,.15); flex:0 0 auto;
   }
   .card.back{ background:repeating-linear-gradient(45deg, #1d4e8c, #1d4e8c 4px, #163d70 4px, #163d70 8px); border:1px solid #0c2a52; }
   .card.red{ color:var(--red-suit); }
   .card.black{ color:var(--ink); }
-  .card.big{ width:clamp(52px, 3.7vw, 68px);height:clamp(74px, 5.2vw, 96px); }
-  .card.big .rank{ font-size:clamp(20px, 1.4vw, 26px); }
-  .card.big .suit{ font-size:clamp(20px, 1.4vw, 26px); }
+  .card.green{ color:var(--club-suit); }
+  .card.blue{ color:var(--diamond-suit); }
+  .card.big{ width:clamp(52px, 5.2vw, 96px);height:clamp(74px, 7.3vw, 134px); }
+  .card.big .rank{ font-size:clamp(20px, 1.95vw, 36px); }
+  .card.big .suit{ font-size:clamp(20px, 1.95vw, 36px); }
 
   .bet-chip{
     display:flex;align-items:center;gap:5px; background:rgba(0,0,0,.35);
@@ -418,6 +422,7 @@
     position:absolute; bottom:0; left:0; right:0; padding:14px 20px 18px;
     background:linear-gradient(0deg, rgba(0,0,0,.55), transparent);
     display:flex;flex-direction:column;align-items:center;gap:10px; z-index:7;
+    max-height:60vh; max-height:60dvh; overflow-y:auto;
   }
   #hand-strength-hint{ font-size:12px; color:var(--muted); height:16px; }
   #action-buttons{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; }
@@ -739,7 +744,9 @@
 <script>
 /* ============================= CONSTANTS ============================= */
 const SUITS = ['♠','♥','♦','♣'];
-const SUIT_COLOR = {'♠':'black','♣':'black','♥':'red','♦':'red'};
+// Four-color deck: each suit gets its own color so ♠/♣ and ♥/♦ are never
+// confused for one another at a glance.
+const SUIT_COLOR = {'♠':'black','♣':'green','♥':'red','♦':'blue'};
 const RANK_LABEL = {11:'J',12:'Q',13:'K',14:'A'};
 const STARTING_CHIPS = 1000;
 const SMALL_BLIND = 10;
