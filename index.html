@@ -211,6 +211,15 @@
   table.sim-table td.pos{ color:#8fd3ae; } table.sim-table td.neg{ color:#e0857c; }
   table.sim-table tr.out td.nm{ opacity:.5; text-decoration:line-through; }
 
+  .head-actions{ display:flex; align-items:center; gap:10px; }
+  .sim-filters{ display:flex; gap:8px; margin:0 0 12px; flex-wrap:wrap; }
+  .sim-select{
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.13);
+    color:var(--cream); border-radius:5px; padding:6px 8px; font-size:11.5px;
+    font-family:'IBM Plex Sans',sans-serif; cursor:pointer;
+  }
+  .sim-select:hover{ border-color:rgba(201,162,39,.45); }
+  .sim-select option:disabled{ color:#666; }
   .sim-tabs{ display:flex; gap:5px; margin:16px 0 10px; flex-wrap:wrap; }
   .sim-tab{
     background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.13);
@@ -558,12 +567,25 @@
     <div class="modal-panel wide">
       <div class="settings-head">
         <h2 id="simResultsTitle">Simulation results</h2>
-        <button class="modal-x" id="simResultsClose" title="Close">✕</button>
+        <div class="head-actions">
+          <button class="ghost-btn" id="simNewBtn">New simulation</button>
+          <button class="modal-x" id="simResultsClose" title="Close">✕</button>
+        </div>
       </div>
 
       <div id="simResultsMain">
         <div id="simSummary"></div>
         <div class="sim-tabs" id="simTabs"></div>
+        <div class="sim-filters" id="simFilters">
+          <select class="sim-select" id="simPlayerFilterSel">
+            <option value="">All players</option>
+          </select>
+          <select class="sim-select" id="simSortSel">
+            <option value="score">Sort: Notability</option>
+            <option value="winnings">Sort: Player winnings</option>
+            <option value="strength">Sort: Hand strength</option>
+          </select>
+        </div>
         <div id="simHandList"></div>
       </div>
 
@@ -3063,6 +3085,10 @@ function finishSimulation(cancelled){
 
   hideSimProgress();
   render();
+  // A fresh run — start the filter/sort over rather than carrying over a
+  // selection that may not even apply to this run's roster.
+  simPlayerFilter = '';
+  simSortMode = 'score';
   showSimResults(summary);
 }
 
@@ -3072,8 +3098,10 @@ function cancelSimulation(){
 
 /* ============================= SIMULATION UI ============================= */
 let simSetup = {hands: 500, rebuy: 'unlimited', limit: 3};
-let simLast = null;      // last results summary
+let simLast = null;      // last results summary — kept after closing so it can be reopened
 let simReplay = null;    // {hand, steps, states, index, timer}
+let simPlayerFilter = '';   // '' = all players
+let simSortMode = 'score';  // 'score' | 'winnings' | 'strength' — the latter two need a player picked
 
 function openSimSetup(){
   document.getElementById('simSetupOverlay').classList.add('open');
@@ -3118,12 +3146,53 @@ function showSimResults(summary){
     summary.cancelled ? `Simulation stopped after ${summary.hands.toLocaleString()} hands`
                       : `${summary.hands.toLocaleString()} hands simulated`;
   renderSimSummary(summary);
+  renderSimFilters(summary);
   const firstWithHands = SIM_TABS.find(t => summary.record.notable[t.key].length);
   simActiveTab = firstWithHands ? firstWithHands.key : 'interesting';
   renderSimTabs();
   renderSimHandList();
 }
+// Just hides the panel — simLast is kept so the ▶ Simulate button can bring
+// the same results back up instead of forcing a fresh run.
 function closeSimResults(){ document.getElementById('simResultsOverlay').classList.remove('open'); stopReplayTimer(); }
+
+function startNewSimulation(){ closeSimResults(); openSimSetup(); }
+
+function renderSimFilters(summary){
+  const sel = document.getElementById('simPlayerFilterSel');
+  const names = summary.simPlayers.map(p => p.name);
+  sel.innerHTML = `<option value="">All players</option>` +
+    names.map(n => `<option value="${n}">${n}</option>`).join('');
+  simPlayerFilter = names.includes(simPlayerFilter) ? simPlayerFilter : '';
+  sel.value = simPlayerFilter;
+  document.getElementById('simSortSel').value = simSortMode;
+  updateSimSortAvailability();
+}
+
+function updateSimSortAvailability(){
+  const sortSel = document.getElementById('simSortSel');
+  const enable = !!simPlayerFilter;
+  sortSel.querySelector('option[value="winnings"]').disabled = !enable;
+  sortSel.querySelector('option[value="strength"]').disabled = !enable;
+  if(!enable && simSortMode !== 'score'){
+    simSortMode = 'score';
+    sortSel.value = 'score';
+  }
+}
+
+// A note reads like "Name called ..." or "Cooler: Name X vs Name Y" — split
+// on non-word characters rather than matching a prefix so both shapes work.
+function noteMentionsPlayer(note, name){
+  return note.split(/[^A-Za-z0-9']+/).includes(name);
+}
+function playerWinnings(h, name){
+  return (h.result.pots || []).reduce((s, p) =>
+    p.winners.includes(name) ? s + p.amount / p.winners.length : s, 0);
+}
+function playerHandStrength(h, name){
+  const entry = h.result.showdown && h.result.showdown.find(x => x.name === name);
+  return entry ? entry.cat : -1;
+}
 
 function renderSimSummary(s){
   const st = s.record.stats;
@@ -3177,18 +3246,29 @@ function renderSimTabs(){
 }
 
 function renderSimHandList(){
-  const list = simLast.record.notable[simActiveTab] || [];
+  let list = simLast.record.notable[simActiveTab] || [];
+
+  if(simPlayerFilter){
+    list = list.filter(item => item.notes.some(n => noteMentionsPlayer(n, simPlayerFilter)));
+  }
+  if(simPlayerFilter && simSortMode !== 'score'){
+    list = list.slice().sort((a, b) => simSortMode === 'winnings'
+      ? playerWinnings(b.hand, simPlayerFilter) - playerWinnings(a.hand, simPlayerFilter)
+      : playerHandStrength(b.hand, simPlayerFilter) - playerHandStrength(a.hand, simPlayerFilter));
+  }
+
   const box = document.getElementById('simHandList');
   if(!list.length){
-    box.innerHTML = `<div class="empty-note">No hands in this category from this run.</div>`;
+    box.innerHTML = `<div class="empty-note">No hands in this category${simPlayerFilter ? ` for ${simPlayerFilter}` : ''} from this run.</div>`;
     return;
   }
   box.innerHTML = list.map((item, i) => {
     const pot = (item.hand.result.pots || []).reduce((s, x) => s + x.amount, 0);
+    const won = simPlayerFilter ? playerWinnings(item.hand, simPlayerFilter) : null;
     return `<div class="hand-row" data-idx="${i}">
       <div class="hand-n">#${item.hand.n}</div>
       <div class="hand-note">${item.notes.join('<br>')}
-        <div class="sub">${item.hand.players.length} players · pot ${pot.toLocaleString()}${item.hand.variant === 'omaha' ? ' · Omaha' : ''}</div>
+        <div class="sub">${item.hand.players.length} players · pot ${pot.toLocaleString()}${item.hand.variant === 'omaha' ? ' · Omaha' : ''}${won != null ? ` · ${simPlayerFilter} won ${Math.round(won).toLocaleString()}` : ''}</div>
       </div>
       <div class="hand-go">Run it ›</div>
     </div>`;
@@ -3514,7 +3594,12 @@ document.getElementById('newGameBtn').addEventListener('click', () => {
 
 
 /* ---- simulation wiring ---- */
-document.getElementById('simBtn').addEventListener('click', openSimSetup);
+// If a run's results are sitting closed, reopen them — New simulation (inside
+// the results panel) is the explicit path to configuring a fresh run.
+document.getElementById('simBtn').addEventListener('click', () => {
+  if(simLast) showSimResults(simLast); else openSimSetup();
+});
+document.getElementById('simNewBtn').addEventListener('click', startNewSimulation);
 document.getElementById('simSetupClose').addEventListener('click', closeSimSetup);
 document.getElementById('simSetupOverlay').addEventListener('click', e => {
   if(e.target.id === 'simSetupOverlay') closeSimSetup();
@@ -3546,6 +3631,15 @@ document.getElementById('simRunBtn').addEventListener('click', () => {
 });
 document.getElementById('simCancelBtn').addEventListener('click', cancelSimulation);
 document.getElementById('simResultsClose').addEventListener('click', closeSimResults);
+document.getElementById('simPlayerFilterSel').addEventListener('change', e => {
+  simPlayerFilter = e.target.value;
+  updateSimSortAvailability();
+  renderSimHandList();
+});
+document.getElementById('simSortSel').addEventListener('change', e => {
+  simSortMode = e.target.value;
+  renderSimHandList();
+});
 document.getElementById('simReplayBack').addEventListener('click', closeReplay);
 document.getElementById('replayNext').addEventListener('click', () => { stopReplayTimer(); replayStep(1); });
 document.getElementById('replayPrev').addEventListener('click', () => { stopReplayTimer(); replayStep(-1); });
