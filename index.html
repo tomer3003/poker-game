@@ -37,7 +37,7 @@
     background:linear-gradient(180deg, rgba(0,0,0,.35), transparent);
     z-index:5;
   }
-  h1{ font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin:0; color:var(--rail-trim); }
+  h1{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(20px, 1.5vw, 27px); margin:0; color:var(--rail-trim); }
   header .sub{ font-size:12px; color:var(--muted); margin-top:2px; }
   header .btn-group{ display:flex; gap:8px; }
   .ghost-btn{
@@ -72,21 +72,21 @@
   #table-wrap{ position:relative; flex:1 1 auto; display:flex; align-items:center; justify-content:center; padding:0 0 130px 0; }
   #table{
     position:relative;
-    width:min(920px, 92vw);
-    height:min(520px, 60vh);
+    width:min(1360px, 84vw);
+    height:min(760px, 72vh);
     background:radial-gradient(ellipse at center, var(--felt-light) 0%, var(--felt-mid) 55%, var(--felt-dark) 100%);
     border-radius:50%;
     border:14px solid var(--rail);
     box-shadow:0 0 0 4px var(--rail-trim) inset, 0 20px 60px rgba(0,0,0,.6), inset 0 0 90px rgba(0,0,0,.45);
   }
-  .seat{ position:absolute; width:130px; transform:translate(-50%,-50%); text-align:center; z-index:3; }
+  .seat{ position:absolute; width:clamp(130px, 9vw, 168px); transform:translate(-50%,-50%); text-align:center; z-index:3; }
   .seat .avatar-row{ display:flex; align-items:center; justify-content:center; gap:6px; position:relative; }
   .seat .avatar{
-    width:38px;height:38px;border-radius:50%;
+    width:clamp(38px, 2.7vw, 50px);height:clamp(38px, 2.7vw, 50px);border-radius:50%;
     background:linear-gradient(145deg,#2c4a3d,#0f2a20);
     border:2px solid var(--rail-trim);
     display:flex;align-items:center;justify-content:center;
-    font-family:'Fraunces',serif;font-weight:600;font-size:15px;
+    font-family:'Fraunces',serif;font-weight:600;font-size:clamp(15px, 1.05vw, 19px);
     color:var(--cream); flex:0 0 auto;
   }
   .seat.bot-removable .avatar{ cursor:pointer; }
@@ -94,9 +94,9 @@
   .seat.bot-removable:hover .avatar:after{ content:'✕'; }
   .seat.folded .avatar{ opacity:.35; filter:grayscale(1); }
   .seat.turn .avatar{ border-color:#ffd76a; box-shadow:0 0 0 3px rgba(255,215,106,.35), 0 0 14px rgba(255,215,106,.6); }
-  .seat .name{ font-size:12px;font-weight:600;margin-top:3px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .seat .name{ font-size:clamp(12px, 0.82vw, 15px);font-weight:600;margin-top:3px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
   .seat .name .pending-tag{ font-weight:400;color:var(--muted);font-size:9.5px; }
-  .seat .stack{ font-size:11px;color:var(--rail-trim); font-variant-numeric:tabular-nums; }
+  .seat .stack{ font-size:clamp(11px, 0.75vw, 14px);color:var(--rail-trim); font-variant-numeric:tabular-nums; }
   .seat.folded .name, .seat.folded .stack{ opacity:.4; }
   .dealer-btn{
     position:absolute; width:18px;height:18px;border-radius:50%;
@@ -116,17 +116,17 @@
   .hole-cards.compact .card{ width:22px; height:32px; font-size:10px; }
   .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:10px; }
   .card{
-    width:30px;height:42px;border-radius:4px; background:var(--card-face);
+    width:clamp(30px, 2.1vw, 40px);height:clamp(42px, 2.95vw, 56px);border-radius:4px; background:var(--card-face);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    font-weight:700;font-size:13px;line-height:1;
+    font-weight:700;font-size:clamp(13px, 0.95vw, 17px);line-height:1;
     box-shadow:0 2px 5px rgba(0,0,0,.4); border:1px solid rgba(0,0,0,.15); flex:0 0 auto;
   }
   .card.back{ background:repeating-linear-gradient(45deg, #1d4e8c, #1d4e8c 4px, #163d70 4px, #163d70 8px); border:1px solid #0c2a52; }
   .card.red{ color:var(--red-suit); }
   .card.black{ color:var(--ink); }
-  .card.big{ width:52px;height:74px; }
-  .card.big .rank{ font-size:20px; }
-  .card.big .suit{ font-size:20px; }
+  .card.big{ width:clamp(52px, 3.7vw, 68px);height:clamp(74px, 5.2vw, 96px); }
+  .card.big .rank{ font-size:clamp(20px, 1.4vw, 26px); }
+  .card.big .suit{ font-size:clamp(20px, 1.4vw, 26px); }
 
   .bet-chip{
     display:flex;align-items:center;gap:5px; background:rgba(0,0,0,.35);
@@ -138,11 +138,11 @@
   #community{ position:absolute;top:50%;left:50%;transform:translate(-50%,-70%); display:flex;gap:8px;z-index:2; }
   #pot-display{ position:absolute;top:50%;left:50%;transform:translate(-50%, 6px); text-align:center;z-index:2; }
   #pot-display .label{ font-size:10px;letter-spacing:1px;color:var(--muted); }
-  #pot-display .amount{ font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:var(--rail-trim); font-variant-numeric:tabular-nums; }
+  #pot-display .amount{ font-family:'Fraunces',serif;font-weight:700;font-size:clamp(22px, 1.55vw, 30px);color:var(--rail-trim); font-variant-numeric:tabular-nums; }
   #phase-badge{ position:absolute;top:50%;left:50%;transform:translate(-50%, 42px); font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted); text-align:center; }
 
   #actionLog{
-    position:fixed; top:64px; right:16px; width:230px; max-height:260px;
+    position:fixed; top:var(--header-h, 64px); right:16px; width:230px; max-height:260px;
     background:var(--panel); border:1px solid rgba(201,162,39,.3); border-radius:8px;
     padding:0 10px 8px; font-size:11.5px; z-index:50; display:flex; flex-direction:column;
   }
@@ -374,7 +374,7 @@
   #settingsDone{ width:100%; margin-top:18px; }
 
   #showdownPanel{
-    position:fixed; top:64px; left:16px; width:262px; max-height:70vh;
+    position:fixed; top:var(--header-h, 64px); left:16px; width:262px; max-height:70vh;
     background:var(--panel); border:1px solid rgba(201,162,39,.55); border-radius:8px;
     padding:0 10px 10px; font-size:12px; z-index:60; display:none;
     flex-direction:column; box-shadow:0 10px 34px rgba(0,0,0,.6);
@@ -470,6 +470,29 @@
     color:#ffd76a; font-weight:600;
     background:rgba(0,0,0,.4); border-radius:4px; padding:2px 5px;
     display:inline-block; max-width:150px;
+  }
+
+  /* ---- narrow screens: the header wraps to multiple rows and the action
+     bar needs to shrink, or they collide with the table and each other ---- */
+  @media (max-width:820px){
+    header{ flex-wrap:wrap; padding:8px 12px; gap:4px 10px; }
+    header .sub{ display:none; }
+    header .btn-group{ flex-wrap:wrap; gap:6px; width:100%; }
+    .ghost-btn{ font-size:10.5px; padding:5px 9px; }
+    #actionLog{ width:min(230px, 58vw); right:8px; }
+    #showdownPanel{ width:min(262px, 78vw); left:8px; }
+  }
+  @media (max-width:520px){
+    #table-wrap{ padding:0 0 215px 0; }
+    #controls{ padding:8px 10px 12px; gap:6px; }
+    #hand-strength-hint{ font-size:11px; }
+    #action-buttons{ gap:6px; }
+    .btn{ font-size:12px; padding:9px 13px; }
+    .btn-quick{ font-size:10px; padding:5px 7px; }
+    #quick-raise-row{ gap:4px; }
+    #raise-row{ gap:6px; }
+    #raiseSlider{ width:110px; }
+    #raiseAmountLabel{ min-width:46px; font-size:12px; }
   }
 </style>
 </head>
@@ -3648,6 +3671,14 @@ document.getElementById('replayReset').addEventListener('click', () => { stopRep
 document.getElementById('replayPlay').addEventListener('click', toggleReplayPlay);
 
 /* ============================= BOOT ============================= */
+// The header can wrap to several rows on narrow screens (8 buttons don't
+// fit one line), so the floating log/showdown panels track its real height
+// instead of a fixed offset that would otherwise sit on top of it.
+const headerEl = document.querySelector('header');
+new ResizeObserver(entries => {
+  document.documentElement.style.setProperty('--header-h', Math.ceil(entries[0].contentRect.height) + 12 + 'px');
+}).observe(headerEl);
+
 initGame();
 startHand();
 </script>
