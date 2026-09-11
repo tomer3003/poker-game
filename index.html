@@ -134,13 +134,13 @@
 
   .bet-chip{
     position:absolute; transform:translate(-50%,-50%); z-index:4;
-    display:flex;align-items:center;gap:5px; background:rgba(0,0,0,.5);
-    padding:3px 8px 3px 3px; border-radius:14px; font-size:11px;
+    display:flex;align-items:center;gap:6px; background:rgba(0,0,0,.5);
+    padding:4px 10px 4px 4px; border-radius:16px; font-size:clamp(13px, 1vw, 17px); font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--cream); width:fit-content;
     box-shadow:0 2px 6px rgba(0,0,0,.4);
   }
   .chip-dot{
-    width:17px;height:17px;border-radius:50%; background:currentColor;
+    width:clamp(17px, 1.3vw, 22px);height:clamp(17px, 1.3vw, 22px);border-radius:50%; background:currentColor;
     border:2.5px dashed var(--cream);
     box-shadow:inset 0 0 0 2.5px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.5);
     flex:0 0 auto;
@@ -153,7 +153,10 @@
   #pot-display{ position:absolute;top:50%;left:50%;transform:translate(-50%, clamp(30px, 10px + 2.2vw, 54px)); text-align:center;z-index:2; }
   #pot-display .label{ font-size:10px;letter-spacing:1px;color:var(--muted); }
   #pot-display .amount{ font-family:'Fraunces',serif;font-weight:700;font-size:clamp(22px, 1.55vw, 30px);color:var(--rail-trim); font-variant-numeric:tabular-nums; }
-  #phase-badge{ position:absolute;top:50%;left:50%;transform:translate(-50%, clamp(68px, 48px + 2.2vw, 90px)); font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted); text-align:center; }
+  /* Nested inside #pot-display so it always sits right below the pot text's
+     actual rendered height, instead of a hand-tuned offset that drifts out
+     of sync whenever the pot text's own size changes. */
+  #phase-badge{ position:absolute;top:100%;left:50%;transform:translate(-50%, 6px); font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted); text-align:center; white-space:nowrap; }
 
   #actionLog{
     position:fixed; top:var(--header-h, 64px); right:16px; width:230px; max-height:260px;
@@ -538,8 +541,8 @@
       <div id="pot-display">
         <div class="label">POT</div>
         <div class="amount" id="potAmount">0</div>
+        <div id="phase-badge"></div>
       </div>
-      <div id="phase-badge"></div>
       <div id="winnerBanner"></div>
     </div>
   </div>
