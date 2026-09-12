@@ -96,9 +96,17 @@
   .seat.bot-removable:hover .avatar:after{ content:'✕'; }
   .seat.folded .avatar{ opacity:.35; filter:grayscale(1); }
   .seat.turn .avatar{ border-color:#ffd76a; box-shadow:0 0 0 3px rgba(255,215,106,.35), 0 0 14px rgba(255,215,106,.6); }
+  @keyframes winnerAura{
+    0%,100%{ box-shadow:0 0 0 4px rgba(255,215,106,.5), 0 0 20px 5px rgba(255,215,106,.55); }
+    50%{ box-shadow:0 0 0 4px rgba(255,215,106,.8), 0 0 32px 9px rgba(255,215,106,.85); }
+  }
+  .seat.aura-winner .avatar{ border-color:#ffd76a; animation:winnerAura 1.6s ease-in-out infinite; }
   .seat .name{ font-size:clamp(12px, 0.82vw, 15px);font-weight:600;margin-top:3px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
   .seat .name .pending-tag{ font-weight:400;color:var(--muted);font-size:9.5px; }
-  .seat .stack{ font-size:clamp(11px, 0.75vw, 14px);color:var(--rail-trim); font-variant-numeric:tabular-nums; }
+  .seat .stack{
+    font-size:clamp(11px, 0.75vw, 14px);color:var(--rail-trim); font-variant-numeric:tabular-nums;
+    display:flex; align-items:center; justify-content:center; gap:4px;
+  }
   .seat.folded .name, .seat.folded .stack{ opacity:.4; }
   .dealer-btn{
     position:absolute; width:18px;height:18px;border-radius:50%;
@@ -115,8 +123,9 @@
   .blind-btn.bb{ background:var(--rail-trim); color:#241407; }
   .blind-btn.ob{ background:#7c4dbd; color:#fff; top:auto; bottom:-6px; left:6px; }
   .hole-cards{ display:flex; gap:3px; justify-content:center; margin-top:4px; height:clamp(44px, 4.2vw, 80px); }
-  .hole-cards.compact .card{ width:22px; height:32px; font-size:10px; }
-  .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:10px; }
+  .hole-cards.compact{ height:clamp(32px, 2.7vw, 50px); }
+  .hole-cards.compact .card{ width:clamp(22px, 1.9vw, 34px); height:clamp(32px, 2.7vw, 50px); font-size:clamp(10px, 0.7vw, 13px); }
+  .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:clamp(10px, 0.7vw, 13px); }
   .card{
     width:clamp(30px, 3vw, 56px);height:clamp(42px, 4.2vw, 78px);border-radius:4px; background:var(--card-face);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -146,12 +155,33 @@
     flex:0 0 auto;
   }
 
+  /* A single chip face, reused by both the stack icon (one color, tidy pile)
+     and the pot icon (mixed colors, loose pile) — same dashed-edge language
+     as .chip-dot so they read as the same object. */
+  .mini-coin{
+    position:absolute; border-radius:50%; background:currentColor;
+    border:1.6px dashed var(--card-face);
+    box-shadow:inset 0 0 0 1.6px rgba(0,0,0,.4);
+  }
+  .stack-icon{ position:relative; display:inline-block; width:14px; height:19px; flex:0 0 auto; }
+  .stack-icon .mini-coin{ width:13px; height:13px; left:0.5px; }
+  .stack-icon .mini-coin:nth-child(1){ top:6px; }
+  .stack-icon .mini-coin:nth-child(2){ top:3px; }
+  .stack-icon .mini-coin:nth-child(3){ top:0; }
+  .pile-icon{ position:relative; display:inline-block; width:22px; height:16px; flex:0 0 auto; }
+  .pile-icon .mini-coin{ width:11px; height:11px; }
+  .pile-icon .mini-coin:nth-child(1){ left:0; top:4px; }
+  .pile-icon .mini-coin:nth-child(2){ left:7px; top:0; }
+  .pile-icon .mini-coin:nth-child(3){ left:5px; top:5px; }
+  .pile-icon .mini-coin:nth-child(4){ left:11px; top:3px; }
+
   #community{ position:absolute;top:50%;left:50%;transform:translate(-50%,-70%); display:flex;gap:8px;z-index:2; }
   /* Community cards grow with .card.big — these offsets scale alongside them
      (roughly 0.3x the card-height clamp) so the pot text clears the cards
      at every screen size instead of sitting under them. */
   #pot-display{ position:absolute;top:50%;left:50%;transform:translate(-50%, clamp(30px, 10px + 2.2vw, 54px)); text-align:center;z-index:2; }
   #pot-display .label{ font-size:10px;letter-spacing:1px;color:var(--muted); }
+  #pot-display .amount-row{ display:flex; align-items:center; justify-content:center; gap:7px; }
   #pot-display .amount{ font-family:'Fraunces',serif;font-weight:700;font-size:clamp(22px, 1.55vw, 30px);color:var(--rail-trim); font-variant-numeric:tabular-nums; }
   /* Nested inside #pot-display so it always sits right below the pot text's
      actual rendered height, instead of a hand-tuned offset that drifts out
@@ -540,7 +570,15 @@
       <div id="community"></div>
       <div id="pot-display">
         <div class="label">POT</div>
-        <div class="amount" id="potAmount">0</div>
+        <div class="amount-row">
+          <span class="pile-icon">
+            <span class="mini-coin" style="color:#a6291f"></span>
+            <span class="mini-coin" style="color:#1f6f4a"></span>
+            <span class="mini-coin" style="color:#1d4e8c"></span>
+            <span class="mini-coin" style="color:#1b1b1b"></span>
+          </span>
+          <span class="amount" id="potAmount">0</span>
+        </div>
         <div id="phase-badge"></div>
       </div>
       <div id="winnerBanner"></div>
@@ -1729,7 +1767,7 @@ function initGame(){
     players, deck:[], community:[], currentBet:0, minRaise:BIG_BLIND,
     dealerId:null, currentBBId:null, sbId:null, omahaBlindId:null, gameStarted:false, turnId:null, phase:'idle',
     actedThisRound:new Set(), handInProgress:false, nextHandBlindMode:'normal', variant:'holdem', forceOmahaNext:false, botQueue:0, dopamineMode:false,
-    finalHandLabel:null, botDifficulty:'medium',
+    finalHandLabel:null, biggestWinnerId:null, botDifficulty:'medium',
     beerLevel:0, heroStats:{hands:0, voluntary:0}, autoRebuyPeople:false,
     checksThisStreet:0, raisesThisRound:0, lastAggressorId:null,
   };
@@ -1982,6 +2020,7 @@ function startHand(){
   game.deck = shuffle(createDeck());
   game.community = [];
   game.finalHandLabel = null;
+  game.biggestWinnerId = null;
   game.currentBet = 0;
   game.minRaise = BIG_BLIND;
   game.actedThisRound = new Set();
@@ -2209,6 +2248,7 @@ function advancePhase(){
 
 /* ============================= POT SETTLEMENT (with side pots) ============================= */
 function settlePot(communityComplete){
+  game.biggestWinnerId = null;
   const participants = game.players.filter(p => p.totalContributed > 0);
   if(participants.length === 0) return [];
 
@@ -2230,6 +2270,7 @@ function settlePot(communityComplete){
   }
 
   const summary = [];
+  const winnings = new Map();   // playerId -> chips actually won (excludes uncalled refunds above)
   layers.forEach((layer, idx) => {
     if(layer.amount <= 0 || layer.eligible.length === 0) return;
     let winners;
@@ -2245,10 +2286,20 @@ function settlePot(communityComplete){
     }
     const share = Math.floor(layer.amount / winners.length);
     let remainder = layer.amount - share * winners.length;
-    winners.forEach((w, i) => { w.chips += share + (i === 0 ? remainder : 0); });
+    winners.forEach((w, i) => {
+      const amt = share + (i === 0 ? remainder : 0);
+      w.chips += amt;
+      winnings.set(w.id, (winnings.get(w.id) || 0) + amt);
+    });
     const label = layers.length > 1 ? (idx === 0 ? 'Main pot' : `Side pot ${idx}`) : 'Pot';
     summary.push(`${label} (${layer.amount}): ${winners.map(w=>w.name).join(' & ')}`);
   });
+
+  // Whoever took the most chips out of this hand gets the aura — a tie keeps
+  // whichever player was found first, rather than crowning both.
+  let biggestId = null, biggestAmt = 0;
+  winnings.forEach((amt, id) => { if(amt > biggestAmt){ biggestAmt = amt; biggestId = id; } });
+  game.biggestWinnerId = biggestId;
 
   log(summary.map(s => `<b>${s}</b>`).join('<br>'));
   participants.forEach(p => p.totalContributed = 0);
@@ -2563,6 +2614,11 @@ function chipColor(amount){
   if(amount >= 50) return '#1f6f4a';
   return '#a6291f';
 }
+function chipStackIconHTML(color){
+  return `<span class="stack-icon" style="color:${color}">
+    <span class="mini-coin"></span><span class="mini-coin"></span><span class="mini-coin"></span>
+  </span>`;
+}
 
 function render(revealAll){
   if(game && game.silent) return;   // simulation runs headless
@@ -2580,6 +2636,7 @@ function render(revealAll){
     if(p.folded && game.handInProgress) cls += ' folded';
     if(p.pendingJoin) cls += ' pending';
     if(game.turnId === p.id && game.handInProgress) cls += ' turn';
+    if(!game.handInProgress && game.biggestWinnerId === p.id) cls += ' aura-winner';
     if(!p.isHuman) cls += ' bot-removable';
     seat.className = cls;
     seat.style.top = pos.top;
@@ -2595,7 +2652,7 @@ function render(revealAll){
       <div class="avatar-row"><div class="avatar">${p.name.slice(0,2).toUpperCase()}</div></div>
       <div class="name">${p.name}${p.pendingJoin ? '<span class="pending-tag"> (joining)</span>' : ''}${p.personality && (p.tilt || 0) > 0.35 ? '<span class="tilt-tag">TILT</span>' : ''}${(p.isHuman || p.personality) ? `<span class="rebuy-tag${(p.rebuys || 0) === 0 ? ' none' : ''}" title="Re-entries this game">⟲${p.rebuys || 0}</span>` : ''}</div>
       ${p.personality && BOT_PERSONALITIES[p.personality] ? `<div class="pers-tag">${BOT_PERSONALITIES[p.personality].archetype}</div>` : ''}
-      <div class="stack">${p.chips}</div>
+      <div class="stack">${chipStackIconHTML(chipColor(p.chips))}${p.chips}</div>
       ${cardsHTML}
       ${p.isHuman && game.finalHandLabel && !game.handInProgress ? `<div class="final-hand">${game.finalHandLabel}</div>` : ''}
       ${game.dealerId === p.id ? '<div class="dealer-btn">D</div>' : ''}
@@ -3054,7 +3111,7 @@ function startSimulation(opts){
     gameStarted: false, turnId: null, phase: 'idle',
     actedThisRound: new Set(), handInProgress: false,
     nextHandBlindMode: 'normal', variant: 'holdem', forceOmahaNext: false,
-    botQueue: 0, dopamineMode: false, finalHandLabel: null,
+    botQueue: 0, dopamineMode: false, finalHandLabel: null, biggestWinnerId: null,
     botDifficulty: saved ? saved.botDifficulty : 'medium',
     beerLevel: opts.beerLevel != null ? opts.beerLevel : (saved ? saved.beerLevel : 0),
     heroStats: {hands: 0, voluntary: 0},
