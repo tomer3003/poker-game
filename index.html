@@ -2443,7 +2443,10 @@ function kickBustedPlayers(){
       p.allIn = false;
       p.bet = 0;
       p.totalContributed = 0;
-      p.hand = [];
+      // Leave p.hand alone here — kickBustedPlayers runs before the showdown's
+      // final render(revealAll), so clearing it early hid a busted-and-rebought
+      // player's cards from their own reveal. startHand() deals them a fresh
+      // hand anyway, so this reset was never doing anything but that.
       p._eq = null;
       log(`<b>${p.name} busts and rebuys</b> — ${STARTING_CHIPS} chips (re-entry #${p.rebuys}).`);
       return;
