@@ -81,7 +81,7 @@
     border:14px solid var(--rail);
     box-shadow:0 0 0 4px var(--rail-trim) inset, 0 20px 60px rgba(0,0,0,.6), inset 0 0 90px rgba(0,0,0,.45);
   }
-  .seat{ position:absolute; width:clamp(130px, 10vw, 190px); transform:translate(-50%,-50%); text-align:center; z-index:3; }
+  .seat{ position:absolute; width:clamp(130px, 11vw, 215px); transform:translate(-50%,-50%); text-align:center; z-index:3; }
   .seat .avatar-row{ display:flex; align-items:center; justify-content:center; gap:6px; position:relative; }
   .seat .avatar{
     width:clamp(38px, 2.7vw, 50px);height:clamp(38px, 2.7vw, 50px);border-radius:50%;
@@ -123,9 +123,15 @@
   .blind-btn.bb{ background:var(--rail-trim); color:#241407; }
   .blind-btn.ob{ background:#7c4dbd; color:#fff; top:auto; bottom:-6px; left:6px; }
   .hole-cards{ display:flex; gap:3px; justify-content:center; margin-top:4px; height:clamp(44px, 4.2vw, 80px); }
-  .hole-cards.compact{ height:clamp(35px, 3.2vw, 61px); gap:2px; }
-  .hole-cards.compact .card{ width:clamp(24px, 2.2vw, 42px); height:clamp(35px, 3.2vw, 61px); font-size:clamp(10.5px, 0.9vw, 15px); }
-  .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:clamp(10.5px, 0.9vw, 15px); }
+  .hole-cards.compact{ height:clamp(35px, 3.63vw, 70px); gap:2px; }
+  .hole-cards.compact .card{ width:clamp(24px, 2.5vw, 48px); height:clamp(35px, 3.63vw, 70px); font-size:clamp(11px, 1.03vw, 17px); }
+  .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:clamp(11px, 1.03vw, 17px); }
+  /* Other players' Omaha hands stay small and out of the way while the hand
+     is live — 4 big card-backs per opponent gets cluttered fast with a full
+     table. They only grow back to the size above if that player actually
+     reaches showdown and their hand is revealed. */
+  .hole-cards.compact.tiny{ height:clamp(20px, 2vw, 39px); gap:1px; }
+  .hole-cards.compact.tiny .card{ width:clamp(14px, 1.4vw, 27px); height:clamp(20px, 2vw, 39px); }
   .card{
     width:clamp(30px, 3vw, 56px);height:clamp(42px, 4.2vw, 78px);border-radius:4px; background:var(--card-face);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -2647,8 +2653,11 @@ function render(revealAll){
     if(!p.isHuman) seat.title = `Click to remove ${p.name}`;
 
     const showFace = p.isHuman || (revealAll && !p.folded);
+    // Omaha's 4-card hands stay small face-down for everyone but the human,
+    // and only grow to full size once they're actually revealed at showdown.
+    const omahaCls = p.hand.length > 2 ? (showFace ? ' compact' : ' compact tiny') : '';
     const cardsHTML = p.hand.length
-      ? `<div class="hole-cards${p.hand.length > 2 ? ' compact' : ''}">${p.hand.map(c => showFace ? cardHTML(c) : cardBackHTML()).join('')}</div>`
+      ? `<div class="hole-cards${omahaCls}">${p.hand.map(c => showFace ? cardHTML(c) : cardBackHTML()).join('')}</div>`
       : `<div class="hole-cards"></div>`;
 
     seat.innerHTML = `
