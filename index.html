@@ -81,7 +81,7 @@
     border:14px solid var(--rail);
     box-shadow:0 0 0 4px var(--rail-trim) inset, 0 20px 60px rgba(0,0,0,.6), inset 0 0 90px rgba(0,0,0,.45);
   }
-  .seat{ position:absolute; width:clamp(130px, 9vw, 168px); transform:translate(-50%,-50%); text-align:center; z-index:3; }
+  .seat{ position:absolute; width:clamp(130px, 10vw, 190px); transform:translate(-50%,-50%); text-align:center; z-index:3; }
   .seat .avatar-row{ display:flex; align-items:center; justify-content:center; gap:6px; position:relative; }
   .seat .avatar{
     width:clamp(38px, 2.7vw, 50px);height:clamp(38px, 2.7vw, 50px);border-radius:50%;
@@ -123,9 +123,9 @@
   .blind-btn.bb{ background:var(--rail-trim); color:#241407; }
   .blind-btn.ob{ background:#7c4dbd; color:#fff; top:auto; bottom:-6px; left:6px; }
   .hole-cards{ display:flex; gap:3px; justify-content:center; margin-top:4px; height:clamp(44px, 4.2vw, 80px); }
-  .hole-cards.compact{ height:clamp(32px, 2.7vw, 50px); }
-  .hole-cards.compact .card{ width:clamp(22px, 1.9vw, 34px); height:clamp(32px, 2.7vw, 50px); font-size:clamp(10px, 0.7vw, 13px); }
-  .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:clamp(10px, 0.7vw, 13px); }
+  .hole-cards.compact{ height:clamp(35px, 3.2vw, 61px); gap:2px; }
+  .hole-cards.compact .card{ width:clamp(24px, 2.2vw, 42px); height:clamp(35px, 3.2vw, 61px); font-size:clamp(10.5px, 0.9vw, 15px); }
+  .hole-cards.compact .card .rank, .hole-cards.compact .card .suit{ font-size:clamp(10.5px, 0.9vw, 15px); }
   .card{
     width:clamp(30px, 3vw, 56px);height:clamp(42px, 4.2vw, 78px);border-radius:4px; background:var(--card-face);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
